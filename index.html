@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+
+    <script src="http://code.createjs.com/easeljs-0.7.0.min.js"></script>
+
+    <script>
+
+        var stage, barPosition, correctPositions;
+
+        function init() {
+
+            correctPositions = {};
+            correctPositions["bar1"] = 150;
+            correctPositions["bar2"] = 170;
+            correctPositions["bar3"] = 180;
+            correctPositions["bar4"] = 190;
+
+            stage = new createjs.Stage('barPlot');
+
+            stage.enableMouseOver();
+            stage.mouseMoveOutside = true;
+
+            var maskRect = createBackgroundMask();
+            var bar1 = createDragBar("bar1", 100, 145, "#604A7B");
+            var bar2 = createDragBar("bar2", 200, 145, "#604A7B");
+            var bar3 = createDragBar("bar3", 300, 145, "#604A7B");
+            var bar4 = createDragBar("bar4", 400, 145, "#604A7B");
+
+            var label = drawLabel("GLP", 115, 140);
+            var label2 = drawLabel("Insulin", 210, 140);
+            var label3 = drawLabel("PYY", 315, 140);
+            var label4 = drawLabel("Glucagon", 400, 140);
+
+            stage.addChild(bar1);
+            stage.addChild(bar2);
+            stage.addChild(bar3);
+            stage.addChild(bar4);
+
+            stage.addChild(maskRect);
+            stage.addChild(label);
+            stage.addChild(label2);
+            stage.addChild(label3);
+            stage.addChild(label4);
+
+            //bit like onEnterFrame()
+            stage.update();
+        }
+
+        function createDragBar(name, x, y, fill) {
+
+            var arrow = drawArrow(fill, "up");
+            var downArrow = drawArrow(fill, "down");
+            downArrow.y = 200;
+
+            var dragger = new createjs.Container();
+            dragger.name = name;
+            dragger.x = x;
+            dragger.y = y;
+            dragger.regY = 100;
+
+            dragger.addEventListener("mousedown",handleMouseDown);
+            dragger.addEventListener("pressmove", handleDragMove);
+            dragger.addEventListener("mouseup", handleMouseUp);
+            dragger.addChild(arrow);
+            dragger.addChild(downArrow);
+
+            return dragger;
+        }
+
+        function drawArrow(fill, direction) {
+
+            var arrow = new createjs.Shape();
+
+            if ( direction == "down" ) {
+                arrow.rotation = 180;
+            }
+
+            arrow.graphics.beginFill(fill);
+            arrow.x = 25;
+            arrow.regX = 25;
+
+            arrow.graphics.moveTo(0,25);
+            arrow.graphics.lineTo(25,0);
+            arrow.graphics.lineTo(50,25);
+            arrow.graphics.lineTo(37.5,25);
+            arrow.graphics.lineTo(37.5,100);
+            arrow.graphics.lineTo(12.5,100);
+            arrow.graphics.lineTo(12.5,25);
+            arrow.graphics.lineTo(0,25);
+            arrow.graphics.endFill();
+
+            return arrow;
+        }
+
+        function createBackgroundMask() {
+            var maskRect = new createjs.Shape();
+            maskRect.x = 40;
+            maskRect.y = 120;
+            maskRect.graphics.beginFill("#E26A15");
+            maskRect.graphics.drawRect(0, 0, 480, 50);
+            return maskRect;
+        }
+
+        function drawLabel(title,x,y) {
+            var label = new createjs.Text();
+            label.text = title;
+            label.color = "white"
+            label.x = x;
+            label.y = y;
+            return label;
+        }
+
+        function handleMouseDown(event) {
+            console.log('recording start position :' + event.stageY);
+            barPosition = event.stageY;
+        }
+
+        function handleMouseUp(event) {
+            console.log('nullifying position ');
+            barPosition = null;
+        }
+
+        function handleDragMove(event) {
+
+            var moveAmount = event.stageY - barPosition;
+
+            var targetName = event.currentTarget.name;
+            var correctPosition = correctPositions[targetName];
+
+            if ( isWithinBounds(event.stageY) ) {
+                event.currentTarget.y += moveAmount;
+            } else if ( event.stageY < 100 ) {
+                event.currentTarget.y = 100;
+            } else if ( event.stageY > 190 ) {
+                event.currentTarget.y = 190;
+            }
+
+            if ( event.currentTarget.y == correctPosition ) {
+
+                var xPos = event.currentTarget.x;
+                var yPos = event.currentTarget.y;
+
+                stage.removeChild(event.currentTarget);
+
+                var dragBar = createDragBar(targetName, xPos, yPos, "green");
+                dragBar.removeEventListener("pressmove", handleDragMove);
+
+                stage.addChildAt(dragBar, 0);
+            }
+
+            stage.update();
+
+            barPosition = event.currentTarget.y;
+        }
+
+        function isWithinBounds(yPos) {
+            return yPos < 190 && yPos > 100;
+        }
+
+    </script>
+
+</head>
+
+
+
+    <body onLoad="init();">
+    <canvas id="barPlot" width="500" height="300">
+        alternate content
+    </canvas>
+    </body>
+</html>

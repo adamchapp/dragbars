@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Draw that arrow</title>
+
+    <script src="http://code.createjs.com/easeljs-0.7.0.min.js"></script>
+
+    <script>
+
+        var stage;
+
+        function init() {
+
+            stage = new createjs.Stage('canvas');
+
+            function drawArrow(fill, direction) {
+
+                var arrow = new createjs.Shape();
+                arrow.width = 50;
+                arrow.height = 100;
+                arrow.graphics.beginFill(fill);
+                arrow.x = -25;
+                arrow.regX = 25;
+                arrow.regY = 50;
+                arrow.y = -50;
+
+                arrow.graphics.moveTo(0,25);
+                arrow.graphics.lineTo(25,0);
+                arrow.graphics.lineTo(50,25);
+                arrow.graphics.lineTo(37.5,25);
+                arrow.graphics.lineTo(37.5,100);
+                arrow.graphics.lineTo(12.5,100);
+                arrow.graphics.lineTo(12.5,25);
+                arrow.graphics.lineTo(0,25);
+                arrow.graphics.endFill();
+
+                if ( direction == "down" ) {
+                    arrow.rotation = 180;
+                }
+
+                return arrow;
+            }
+
+            var arrow = drawArrow("#604A7b", "up");
+
+
+            stage.addChild(arrow);
+            stage.update();
+        }
+
+    </script>
+
+</head>
+
+    <body onLoad="init();">
+        <canvas id="canvas" width="500" height="300">
+            alternate content
+        </canvas>
+    </body>
+</html>
